@@ -314,7 +314,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
 <span class="c"># Option C: Custom Keras model (must use compatible layers only)</span>
 <span class="k">from</span> <span class="p">tensorflow.keras</span> <span class="k">import</span> <span class="p">layers, Model</span>
-<span class="c"># Use Conv2D + ReLU blocks, avoid BatchNorm (it gets folded automatically)</span></pre>
+<span class="c"># Use Conv2D + ReLU blocks — BatchNorm is fine too, it gets folded automatically</span></pre>
       <div class="ib amber" style="margin-top:16px">
         <div class="ii">⚠</div>
         <p><strong>Channels last is mandatory.</strong> Akida hardware uses (Height, Width, Channels) layout — the TensorFlow default. If your model uses channels-first (PyTorch convention), you must transpose. The MetaONNX path handles this automatically; for Keras models you must ensure channels-last from the start.</p>
@@ -398,7 +398,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
         <div class="step-title">QAT — fine-tune (optional)</div>
         <span class="step-badge" style="background:#ede9fe;color:#6d28d9">quantizeml · optional</span>
       </div>
-      <p class="step-desc">If PTQ accuracy is acceptable, skip this step. If accuracy dropped too much — common at 4-bit — run a short fine-tuning pass on the already-quantized model. In QuantizeML, this is simply calling <code>model.fit()</code> again. The quantized layer implementations are fully differentiable, so the optimizer adjusts the integer weights to minimise the quantization-induced error.</p>
+      <p class="step-desc">If PTQ accuracy is acceptable, skip this step. If accuracy dropped too much — common at 4-bit — run a short fine-tuning pass on the already-quantized model. In QuantizeML, this is simply calling <code>model.fit()</code> again. The quantization ops (rounding, clipping) are real ops with zero gradient of their own, but a Straight-Through Estimator (STE) passes gradients through them during backpropagation as if they weren't there — so the optimizer can still adjust the underlying weights to minimise the quantization-induced error.</p>
       <div class="io-row">
         <div class="io-box io-in"><div class="io-label">Start with</div><div class="io-val">keras.Model (quantized)</div><div class="io-sub">PTQ result from step 3</div></div>
         <div class="io-arrow">→</div>
@@ -491,7 +491,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 <span class="p">akida_model</span>.<span class="fn">summary</span>()  <span class="c"># now shows NP allocation, sequences, SRAM usage</span>
 
 <span class="c"># ─── Run inference ───</span>
-<span class="c"># Input MUST be uint8 numpy array, shape (N, H, W, C), channels last</span>
+<span class="c"># Input must be uint8 (e.g. images) or int8 (e.g. spikes from a DVS camera), shape (N, H, W, C), channels last</span>
 <span class="p">img</span> = np.<span class="fn">expand_dims</span>(<span class="p">image_uint8</span>, axis=<span class="v">0</span>)  <span class="c"># (1, 224, 224, 3)</span>
 
 <span class="c"># forward() — returns integer potentials (for classification use predict())</span>
@@ -571,7 +571,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
         <td>Temporal block (TENN)</td>
         <td class="arrow">→</td>
         <td><code>TemporalConv2D</code></td>
-        <td>Maps to TNP_B / TNP_R. Akida 2.0 only. Maintains state across time steps.</td>
+        <td>Maps to TNP_B. Akida 2.0 only — TNP_R is Pico-only and is not part of the Akida 2.0 IP. Maintains state across time steps.</td>
       </tr>
     </tbody>
   </table>
@@ -590,9 +590,9 @@ Layer (type)          Params
 conv2d (QuantizedConv2D) 896
 relu (Activation)    0
 batch_norm (folded)  0
-dense (QuantizedDense) 82,010
+dense (QuantizedDense) 81,930
 ===============================
-Total params: 82,906</pre>
+Total params: 82,826</pre>
     </div>
     <div class="summary-box summary-akida">
       <div class="summary-label">Akida model (after cnn2snn.convert)</div>
@@ -656,7 +656,7 @@ dense           [1,1,10] (1,1,
   </div>
 
   <div class="dev-detail" id="dev-detail">
-    <strong style="color:var(--acd)">SixNodesIPv2()</strong> — The Akida 2.0 virtual device with a 6-node mesh. This is what the FPGA evaluation board uses and what the YOLOv8n notebook falls back to when no physical hardware is connected. Enforces all Akida 2.0 hardware constraints — if your model maps successfully here, it will map on the real FPGA. Use for development, accuracy validation, and mapping verification without needing physical hardware.
+    <strong style="color:var(--acd)">SixNodesIPv2()</strong> — The Akida 2.0 virtual device with a 6-node mesh. This is what the FPGA evaluation board uses, and the standard software fallback when no physical hardware is connected. Enforces all Akida 2.0 hardware constraints — if your model maps successfully here, it will map on the real FPGA. Use for development, accuracy validation, and mapping verification without needing physical hardware.
   </div>
 
   <!-- MapMode -->
@@ -757,7 +757,7 @@ dense           [1,1,10] (1,1,
   <div class="chips">
     <span class="chip cg_">akida-models zoo</span>
     <span class="chip cg_">Channels-last input</span>
-    <span class="chip cg_">uint8 input format</span>
+    <span class="chip cg_">uint8 / int8 input format</span>
     <span class="chip cb_">QuantizationParams</span>
     <span class="chip cb_">quantize(model, qparams, samples)</span>
     <span class="chip cb_">QAT = model.fit() on quantized model</span>
@@ -837,9 +837,9 @@ function prevStep(){ if(step>0) goStep(step-1); }
 // ── DEVICE SELECTOR ──
 const devData=[
   {name:'akida.devices()[0]',desc:'<strong style="color:var(--acd)">Real hardware (connected device)</strong> — discovers any physically connected Akida device (PCIe FPGA board, AKD1000 M.2 card, etc.). Returns a list — use index 0 for the first device. This is what you use for production benchmarking (real FPS and power measurements). If no device is connected, the list is empty — always have a virtual fallback.'},
-  {name:'AKD1000()',desc:'<strong style="color:var(--acd)">AKD1000 virtual device</strong> — simulates the Akida 1.0 reference SoC with 80 NPUs in a mesh. Use to validate Akida 1.0 compatibility and mapping before deploying to AKD1000 hardware. Enforces 1.0 hardware constraints — models using 8-bit or TNP will fail to map here.'},
-  {name:'SixNodesIPv2()',desc:'<strong style="color:var(--acd)">SixNodesIPv2()</strong> — The Akida 2.0 virtual device with a 6-node mesh. This is what the FPGA evaluation board uses and what the YOLOv8n notebook falls back to when no physical hardware is connected. Enforces all Akida 2.0 hardware constraints. Use for development, accuracy validation, and mapping verification without needing physical hardware.'},
-  {name:'TwoNodesIPv2()',desc:'<strong style="color:var(--acd)">TwoNodesIPv2()</strong> — A 2-node Akida 2.0 virtual device. Useful for testing smaller model configurations or understanding how a model maps to a minimal Akida 2.0 deployment. Related to the open item about reconfiguring the FPGA from 6-node to 2-node (requires re-synthesis).'},
+  {name:'AKD1000()',desc:'<strong style="color:var(--acd)">AKD1000 virtual device</strong> — simulates the Akida 1.0 reference SoC with 80 NPs in a mesh. Use to validate Akida 1.0 compatibility and mapping before deploying to AKD1000 hardware. Enforces 1.0 hardware constraints — models using 8-bit or TNP will fail to map here.'},
+  {name:'SixNodesIPv2()',desc:'<strong style="color:var(--acd)">SixNodesIPv2()</strong> — The Akida 2.0 virtual device with a 6-node mesh. This is what the FPGA evaluation board uses, and the standard software fallback when no physical hardware is connected. Enforces all Akida 2.0 hardware constraints. Use for development, accuracy validation, and mapping verification without needing physical hardware.'},
+  {name:'TwoNodesIPv2()',desc:'<strong style="color:var(--acd)">TwoNodesIPv2()</strong> — A 2-node Akida 2.0 virtual device. Useful for testing smaller model configurations or understanding how a model maps to a minimal Akida 2.0 deployment.'},
   {name:'create_device()',desc:'<strong style="color:var(--acd)">create_device()</strong> — Build a completely custom virtual device by specifying exactly which NP types to include, how many of each, and their SRAM configuration. Use when you are designing a custom SoC integration and want to model the exact NP budget you plan to implement in silicon.'},
   {name:'compute_min_device()',desc:'<strong style="color:var(--acd)">compute_min_device(model)</strong> — Computes and returns the smallest virtual device that can fit a given model. Useful for determining the minimum hardware specification for your deployment before committing to a physical design. The companion <code>compute_common_device([m1, m2, m3])</code> finds a device that can run all of a list of models.'},
 ];

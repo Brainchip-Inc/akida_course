@@ -279,7 +279,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
   <div class="dev-detail" id="dev-detail">
     <strong style="color:var(--acd);font-size:15px">SixNodesIPv2()</strong> — Akida 2.0 IP, 6-node mesh ★<br><br>
-    The 6-node Akida 2.0 virtual device. This is the configuration running on the FPGA evaluation board and the fallback device in the YOLOv8n notebook. Supports 8-bit, 4-bit, and 1-bit weights and activations. Contains CNP2, FNP3, and TNP components. Enforces Akida 2.0 hardware constraints — models that map here will map on the physical FPGA. The ★ marks this as the primary device for this course.
+    The 6-node Akida 2.0 virtual device. This is the configuration running on the FPGA evaluation board. Supports 8-bit and 4-bit weights and activations. Contains CNP2, FNP3, and TNP_B components. Enforces Akida 2.0 hardware constraints — models that map here will map on the physical FPGA. The ★ marks this as the primary device for this course.
   </div>
 
   <p style="margin-top:20px">All virtual devices are constructed with no arguments and are immediately usable:</p>
@@ -362,7 +362,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
   <div class="ib amber">
     <div class="ii">⚠</div>
-    <p><strong>The FPGA node-count open item:</strong> The question of reconfiguring the FPGA from 6-node to 2-node (for MobileNetV2 sizing reference) is exactly a <code>create_device()</code> and <code>compute_min_device()</code> question in software. In hardware it requires re-synthesising the FPGA bitstream with a different NP count. Verify in software first: <code>model.map(TwoNodesIPv2())</code> — if this succeeds, the model fits in a 2-node configuration. If it fails, check the error message to see which constraint is violated.</p>
+    <p><strong>The FPGA node-count open item:</strong> The question of reconfiguring the FPGA from 6-node to 2-node is exactly a <code>create_device()</code> and <code>compute_min_device()</code> question in software. In hardware it requires re-synthesising the FPGA bitstream with a different NP count. Verify in software first: <code>model.map(TwoNodesIPv2())</code> — if this succeeds, the model fits in a 2-node configuration. If it fails, check the error message to see which constraint is violated.</p>
   </div>
 </div>
 
@@ -494,7 +494,7 @@ TNP_B              2</span>
 <span style="color:#4a5568">________________________________________________________________</span>
 <span class="hl a1" data-key="layertable" onclick="showAnn('layertable')">Layer (type)        Output shape    Kernel shape    Components</span>
 <span class="hl a3" data-key="seqhdr" onclick="showAnn('seqhdr')">======= HW/conv_0-dense_29 (Hardware) - size: 88,748 bytes =======</span>
-<span class="hl a2" data-key="layer1" onclick="showAnn('layer1')">conv_0 (InputConv.)  [112,112,32]   (3,3,3,32)      2 HRC</span>
+<span class="hl a2" data-key="layer1" onclick="showAnn('layer1')">conv_0 (InputConv.)  [112,112,32]   (3,3,3,32)      1 HRC</span>
 <span class="hl a2" data-key="layer2" onclick="showAnn('layer2')">conv_1 (Conv2D)      [112,112,64]   (3,3,32,64)     4 CNP2</span>
 <span style="color:#4a5568">conv_2 (DepthwConv.)  [56, 56,64]   (3,3,64,1)      2 CNP2</span>
 <span style="color:#4a5568">...</span>
@@ -577,7 +577,7 @@ TNP_B              2</span>
   <span class="ew">07 · Open items</span>
   <h2>Connecting the FPGA open items to the API</h2>
 
-  <p>The three open items from the YOLOv8n notebook email each map directly to concepts in this module:</p>
+  <p>Three recurring FPGA/device-configuration questions map directly to concepts in this module:</p>
 
   <div class="g3">
     <div class="card" style="border-top:3px solid #38bdf8">
@@ -585,8 +585,8 @@ TNP_B              2</span>
       <p style="font-size:13px">Verify in software first with <code>model.map(TwoNodesIPv2())</code>. If it succeeds → the model fits in 2 nodes. If it fails with an NP error → the model genuinely needs more NPs. Re-synthesising the FPGA bitstream with a different node count is a hardware operation outside the SDK.</p>
     </div>
     <div class="card" style="border-top:3px solid #4ade80">
-      <h3 style="margin-top:0;font-size:14px;color:#15803d">Per-node SRAM modification</h3>
-      <p style="font-size:13px">The scratchpad SRAM size is set at FPGA synthesis time. Software: model with <code>sram_size</code> in <code>create_device()</code> to explore different sizes. The actual FPGA modification requires re-synthesis. The <code>compute_minimal_memory()</code> function tells you the minimum SRAM needed.</p>
+      <h3 style="margin-top:0;font-size:14px;color:#15803d">Mesh-level scratchpad SRAM modification</h3>
+      <p style="font-size:13px">The scratchpad is a single SRAM block shared across the entire mesh (not owned by any one node); its size is set at FPGA synthesis time. Software: model with <code>sram_size</code> in <code>create_device()</code> to explore different sizes. The actual FPGA modification requires re-synthesis. The <code>compute_minimal_memory()</code> function tells you the minimum SRAM needed.</p>
     </div>
     <div class="card" style="border-top:3px solid #a78bfa">
       <h3 style="margin-top:0;font-size:14px;color:#7c3aed">Internal NP / node architecture reference</h3>
@@ -681,7 +681,7 @@ const devData=[
   {title:'akida.devices()[0] — physical hardware',body:'Discovers any connected Akida device via the PCIe or USB driver. Returns a list — <code>devices()[0]</code> selects the first. Use this for production benchmarking where real FPS and power measurements are needed. Always have a virtual fallback: <code>devices()[0] if devices() else SixNodesIPv2()</code>. Real hardware gives accurate statistics; virtual devices only give cycle counts.'},
   {title:'AKD1000() — Akida 1.0 reference SoC virtual',body:'Simulates the AKD1000 chip — the first commercial Akida product, released January 2022. 80 NPUs in a mesh, 28nm process, supports 1, 2, and 4-bit weights only (not 8-bit). Use to validate Akida 1.0 compatibility. If your model maps here, it will run on the physical AKD1000 M.2 card or PCIe board.'},
   {title:'AKD1500() — Akida 1.0 extended virtual',body:'Virtual device matching the AKD1500 specification — an extended Akida 1.0 design. Similar to AKD1000 but with different NP configuration. Use when targeting AKD1500 hardware.'},
-  {title:'SixNodesIPv2() — Akida 2.0 FPGA configuration ★',body:'The 6-node Akida 2.0 IP virtual device. This is the configuration on the FPGA evaluation board. Supports 8-bit, 4-bit, and 1-bit. Contains HRC, CNP2, FNP3, and TNP components. This is the primary device for this course — the YOLOv8n notebook uses it as the software fallback when no physical FPGA is connected.'},
+  {title:'SixNodesIPv2() — Akida 2.0 FPGA configuration ★',body:'The 6-node Akida 2.0 IP virtual device. This is the configuration on the FPGA evaluation board. Supports 8-bit and 4-bit weights and activations. Contains HRC, CNP2, FNP3, and TNP_B components. This is the primary device for this course, used as the software fallback when no physical FPGA is connected.'},
   {title:'TwoNodesIPv2() — minimal Akida 2.0 configuration',body:'A 2-node Akida 2.0 virtual device — the smallest Akida 2.0 configuration. Useful for testing whether a model fits in a minimal deployment. Related to the FPGA open item about reconfiguring from 6-node to 2-node — test in software with this first before requesting an FPGA re-synthesis.'},
   {title:'create_device() — fully custom virtual device',body:'Build a virtual device with exactly the NP count your SoC design will have. Specify <code>num_cnp_tnp</code> (CNP/TNP units), <code>num_fnp</code> (FNP units), <code>num_skip_dma_channel</code> (residual connections), and <code>include_hrc</code>. Use after <code>compute_min_device()</code> to confirm your proposed NP budget is sufficient before finalising the silicon design.'},
 ];
@@ -710,7 +710,7 @@ const annData={
   comptable:{title:'Component type table — which NP hardware types are used',body:'A breakdown of how many of each component type (HRC, CNP2, FNP3, TNP_B/R, etc.) are allocated. This is the bridge between the model summary and the hardware architecture (Module 2). Check: the HRC count should be 1 for any image model. CNP2 count = most of the backbone layers. FNP3 = typically 1 for the classifier. TNP = only present in TENN/temporal models.'},
   layertable:{title:'Per-layer table — header row',body:'Column headers for the per-layer detail. Layer (type) = Akida layer type name. Output shape = spatial dimensions after this layer. Kernel shape = (H, W, in_channels, out_channels). Components = which NP types and how many are assigned to this specific layer.'},
   seqhdr:{title:'Sequence header line',body:'Marks the start of an execution sequence. The <strong>HW/</strong> prefix means this is a hardware sequence (runs on Akida chip). <strong>SW/</strong> would mean a software/CPU sequence. The name (e.g. conv_0-dense_29) is auto-generated from the first and last layer names. The <strong>size in bytes</strong> is the total compiled program size for this sequence — useful for checking SRAM fit.'},
-  layer1:{title:'InputConv2D — the HRC layer',body:'The first layer of any image model. Type "InputConv." confirms this maps to the HRC (High Resolution Convolution) component. The kernel shape (3,3,3,32) = 3×3 kernel, 3 input channels (RGB), 32 output channels. Components "2 HRC" means 2 HRC units are used to process this layer in parallel. The HRC handles the dense uint8 input → sparse event conversion.'},
+  layer1:{title:'InputConv2D — the HRC layer',body:'The first layer of any image model. Type "InputConv." confirms this maps to the HRC (High Resolution Convolution) component. The kernel shape (3,3,3,32) = 3×3 kernel, 3 input channels (RGB), 32 output channels. Components "1 HRC" means a single HRC unit processes this layer — matching the Component table above, which lists exactly 1 HRC for the whole model. The HRC handles the dense uint8 input → sparse event conversion.'},
   layer2:{title:'Conv2D — regular convolutional layer',body:'A standard convolutional layer mapping to CNP2 components. "4 CNP2" = 4 convolutional neural processors working in parallel on this layer. More CNPs per layer = more parallelism = faster processing, but uses more NP budget. The output shape shows spatial downsampling has occurred (112→56 etc.). Multiple layers may share NPs under some MapModes.'},
   layerfc:{title:'FullyConnected — the FNP layer',body:'The final classifier layer. Type "Fully." confirms this maps to FNP3 (FullyConnected Neural Processor with internal SRAM). Kernel shape (1,1,512,1000) = 512 input features, 1000 output classes. "1 FNP3" = one FullyConnected NP handles the entire dense layer. This is usually the last layer before the output.'},
 };

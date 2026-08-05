@@ -235,7 +235,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
       <h3>Use MetaTF when…</h3>
       <ul>
         <li>Your model is in <strong>TensorFlow/Keras</strong></li>
-        <li>You need <strong>4-bit or 1-bit</strong> quantization</li>
+        <li>You need <strong>4-bit</strong> quantization</li>
         <li>You want <strong>on-chip QAT</strong> via <code>model.fit()</code></li>
         <li>Your model is <strong>fully hardware-compatible</strong> (no CPU fallback layers)</li>
         <li>You use Akida-specific features (Edge Learning, TENNs via the zoo)</li>
@@ -281,7 +281,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
         </div>
         <div class="hm-arrow" style="border-left:1px solid var(--bd)">
           <svg width="16" height="30" viewBox="0 0 16 30"><path d="M2 15 L14 15" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#a5)"/><defs><marker id="a5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-linecap="round"/></marker></defs></svg>
-          <span style="font-size:9px;color:#38bdf8;font-family:'DM Mono',monospace;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">147 KB</span>
+          <span style="font-size:9px;color:#38bdf8;font-family:'DM Mono',monospace;writing-mode:vertical-rl;text-orientation:mixed;transform:rotate(180deg)">1200 KB</span>
         </div>
         <div class="hm-akida" style="flex:3">
           <div class="hm-label">Akida hardware (AkidaOp)</div>
@@ -307,7 +307,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
         <span style="display:flex;align-items:center;gap:6px"><span style="width:14px;height:14px;background:#dbeafe;border:1px solid #60a5fa;border-radius:3px;display:inline-block"></span>Boundary transfer size (KB)</span>
       </div>
     </div>
-    <div class="dc">The 147 KB input boundary is the cost of sending a 640×640×3 uint8 image to the Akida chip. The ~24 KB output boundary is the feature map tensor that comes back to the CPU for detection head post-processing. These sizes are visible in <code>hybrid_model.compute_data_movement()</code> and the <code>summary()</code> output.</div>
+    <div class="dc">The 1200 KB input boundary is the cost of sending a 640×640×3 uint8 image to the Akida chip. The ~24 KB output boundary is the feature map tensor that comes back to the CPU for detection head post-processing. These sizes are visible in <code>hybrid_model.compute_data_movement()</code> and the <code>summary()</code> output.</div>
   </div>
 
   <p>The HybridModel is not just a container — it is a runnable ONNX graph. <code>generate_inference_model()</code> produces a deployable ONNX file where each AkidaOp appears as a custom ONNX node. At inference time, <code>AkidaInferenceSession</code> (built on ONNXRuntime) transparently routes each node to the correct backend — Akida runtime for AkidaOp nodes, CPU for everything else.</p>
@@ -423,7 +423,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
 <span class="c"># Programmatic access to compatibility data</span>
 <span class="fn">print</span>(<span class="p">compat_info</span>.compatibility_percentage)    <span class="c"># e.g. 92.5</span>
-<span class="fn">print</span>(<span class="p">compat_info</span>.incompatible_op_types)        <span class="c"># e.g. {'Sigmoid', 'Reshape', 'NonMaxSuppression'}</span>
+<span class="fn">print</span>(<span class="p">compat_info</span>.incompatible_op_types)        <span class="c"># e.g. {'Sigmoid', 'Reshape', 'Transpose', 'Concat'}</span>
 <span class="fn">print</span>(<span class="p">compat_info</span>.incompatible_nodes[:3])       <span class="c"># list of node names</span>
 
 <span class="c"># Save ONNX with nodes tagged as AK&lt;&gt; or CPU&lt;&gt; for visual inspection</span>
@@ -432,7 +432,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 <span class="c"># Check data movement at each CPU↔Akida boundary</span>
 <span class="p">movements</span> = <span class="p">hybrid_model</span>.<span class="fn">compute_data_movement</span>()
 <span class="k">for</span> <span class="p">boundary</span> <span class="k">in</span> <span class="p">movements</span>:
-    <span class="fn">print</span>(<span class="p">boundary</span>)  <span class="c"># e.g. "CPU → Akida at /conv_stem/Conv: 147.000 KB"</span></pre>
+    <span class="fn">print</span>(<span class="p">boundary</span>)  <span class="c"># e.g. "CPU → Akida at /conv_stem/Conv: 1200.000 KB"</span></pre>
 
       <div class="report-box">
         <span class="rc"># Example print_report() output for YOLOv8n:</span><br><br>
@@ -440,7 +440,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
         <span class="rw">[INFO]</span>: Number of mappable sequences on akida: <span class="rg">1</span><br><br>
         <span class="rw">[INFO]</span>: Incompatible op types: <span class="rb">{'Sigmoid', 'Reshape', 'Transpose', 'Concat'}</span><br><br>
         List of backends exchanges:<br>
-        &nbsp;• <span class="rg">CPU → Akida</span> at layer <span class="rn">/model.0/conv/Conv</span>: <span class="rw">147.000 KB</span><br>
+        &nbsp;• <span class="rg">CPU → Akida</span> at layer <span class="rn">/model.0/conv/Conv</span>: <span class="rw">1200.000 KB</span><br>
         &nbsp;• <span class="rg">Akida → CPU</span> at layer <span class="rn">/model.22/Sigmoid</span>: <span class="rw">23.625 KB</span>
       </div>
     </div>
@@ -576,7 +576,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
       <tr>
         <td><code>input_dtype</code></td>
         <td><code>'uint8'</code></td>
-        <td>Expected input data type. BrainChip's Akida hardware takes uint8. Match your preprocessing pipeline to this.</td>
+        <td>Expected input data type. BrainChip's Akida hardware accepts either <code>uint8</code> (e.g. RGB images) or <code>int8</code> (e.g. event/spike data from a DVS camera). Match your preprocessing pipeline to this.</td>
       </tr>
       <tr>
         <td><code>samples</code></td>
@@ -585,8 +585,8 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
       </tr>
       <tr>
         <td><code>num_samples</code></td>
-        <td><code>1</code></td>
-        <td>How many samples from <code>samples</code> to use. Default is 1 (fast, inaccurate). Use 256–1024 for production.</td>
+        <td><code>1024</code></td>
+        <td>How many samples from <code>samples</code> to use. Lower values (e.g. 1) are faster but less accurate. Use 256–1024 real, representative samples for production.</td>
       </tr>
       <tr>
         <td><code>device</code></td>
@@ -596,7 +596,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
       <tr>
         <td><code>enable_hwpr</code></td>
         <td><code>False</code></td>
-        <td>If True and <code>device=None</code>, the automatically-computed device will leverage hardware partial reconfiguration. Enables larger models that don't fit in SRAM in a single pass.</td>
+        <td>If True and <code>device=None</code>, intended to let the automatically-computed device leverage hardware partial reconfiguration for larger models that don't fit in SRAM in a single pass — exact behaviour is being confirmed with BrainChip's HW/SW team.</td>
       </tr>
       <tr>
         <td><code>sram_size</code></td>
@@ -631,7 +631,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
           <tr class="sum-cpu"><td>quantizer (Quantizer)</td><td>[1, 3, 640, 640]</td><td>input</td><td></td></tr>
 
           <tr class="sum-sep"><td colspan="4">─── Akida Sub-model 0 (Hardware) ───</td></tr>
-          <tr class="sum-akida"><td style="color:#059669">model.0/conv (InputConv.)</td><td>[320, 320, 16]</td><td>quantizer</td><td class="data-mv">← CPU→Akida: 147.0 KB</td></tr>
+          <tr class="sum-akida"><td style="color:#059669">model.0/conv (InputConv.)</td><td>[320, 320, 16]</td><td>quantizer</td><td class="data-mv">← CPU→Akida: 1200.0 KB</td></tr>
           <tr class="sum-akida"><td style="color:#059669">model.1/conv (Conv2D)</td><td>[160, 160, 32]</td><td>model.0</td><td></td></tr>
           <tr class="sum-akida"><td style="color:#059669">model.2/… (Conv2D ×n)</td><td>[80, 80, 64]</td><td>model.1</td><td></td></tr>
           <tr class="sum-akida"><td style="color:#059669">… (backbone + neck)</td><td>[…]</td><td>…</td><td></td></tr>
@@ -657,7 +657,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
     <span class="fn">print</span>(<span class="r">f"{dm.direction} at '{dm.layer_name}': {dm.size_kb:.3f} KB"</span>)
 
 <span class="c"># Example output:</span>
-<span class="c">#   CPU→Akida at '/model.0/conv/Conv': 147.000 KB</span>
+<span class="c">#   CPU→Akida at '/model.0/conv/Conv': 1200.000 KB</span>
 <span class="c">#   Akida→CPU at '/model.22/Sigmoid': 23.625 KB</span>
 
 <span class="c"># Total boundary cost (both directions)</span>
@@ -666,7 +666,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
   <div class="ib amber">
     <div class="ii">⚠</div>
-    <p><strong>Large boundaries hurt latency:</strong> Every CPU↔Akida boundary is a PCIe or AXI DMA transfer. A 147 KB input transfer at PCIe Gen2 x1 speed takes ~0.5 ms — which can dominate inference time if the model is fast. When optimising for latency, look at the boundary sizes in <code>compute_data_movement()</code> and consider whether the model architecture can be restructured to move the boundary earlier (reducing the input size) or eliminate it entirely.</p>
+    <p><strong>Large boundaries hurt latency:</strong> Every CPU↔Akida boundary is a PCIe or AXI DMA transfer. A 1200 KB input transfer at PCIe Gen2 x1 speed takes ~2.4 ms — which can dominate inference time if the model is fast. When optimising for latency, look at the boundary sizes in <code>compute_data_movement()</code> and consider whether the model architecture can be restructured to move the boundary earlier (reducing the input size) or eliminate it entirely.</p>
   </div>
 </div>
 
@@ -681,8 +681,8 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
     </thead>
     <tbody>
       <tr><td>Source framework</td><td>TensorFlow / Keras</td><td>Any framework via ONNX (PyTorch, TF, HuggingFace)</td></tr>
-      <tr><td>Quantization bitwidths</td><td>1, 4, or 8-bit</td><td>8-bit only</td></tr>
-      <tr><td>QAT support</td><td>Yes — <code>model.fit()</code> on quantized model</td><td>No — must do QAT in PyTorch before export</td></tr>
+      <tr><td>Quantization bitwidths</td><td>4 or 8-bit</td><td>8-bit only</td></tr>
+      <tr><td>QAT support</td><td>Yes — <code>model.fit()</code> on quantized model</td><td>No — <code>onnx2akida.convert()</code> only performs PTQ; if accuracy is insufficient, switch to the MetaTF/QuantizeML path for QAT</td></tr>
       <tr><td>Unsupported ops</td><td>Fail at convert() unless Dequantizer inserted</td><td>Automatically route to CPU (HybridModel)</td></tr>
       <tr><td>Output format</td><td><code>akida.Model</code> → <code>.fbz</code></td><td><code>HybridModel</code> → <code>inference_model.onnx</code> + <code>.fbz</code></td></tr>
       <tr><td>Inference API</td><td><code>model.forward()</code> / <code>model.predict()</code></td><td><code>AkidaInferenceSession.run()</code></td></tr>
@@ -698,7 +698,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
   <span class="ew">07 · Practical example</span>
   <h2>YOLOv8n end-to-end — the complete notebook flow</h2>
 
-  <p>This is the pattern described in the YOLOv8n action item notebook. The code below is the complete, runnable end-to-end flow for deploying YOLOv8n on BrainChip Akida hardware via the SixNodesIPv2 device (with automatic fallback from real FPGA hardware).</p>
+  <p>The code below is the complete, runnable end-to-end flow for deploying YOLOv8n on BrainChip Akida hardware via the SixNodesIPv2 device (with automatic fallback from real FPGA hardware).</p>
 
 <pre><span class="k">import</span> <span class="p">onnx, akida, numpy as np, os</span>
 <span class="k">from</span> <span class="p">ultralytics</span> <span class="k">import</span> <span class="p">YOLO</span>
@@ -746,7 +746,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
   <div class="ib green">
     <div class="ii">✓</div>
-    <p><strong>The notebook pattern:</strong> The first code cell has a commented <code>pip install onnx2akida</code> for standalone use. The device selection uses <code>akida.devices()[0] if akida.devices() else akida.SixNodesIPv2()</code> — this is exactly the fallback pattern described in the YOLOv8n action item, allowing the notebook to run on both the physical FPGA and in a software-only environment.</p>
+    <p><strong>The notebook pattern:</strong> The first code cell has a commented <code>pip install onnx2akida</code> for standalone use. The device selection uses <code>akida.devices()[0] if akida.devices() else akida.SixNodesIPv2()</code> — this recommended fallback pattern lets the notebook run on both the physical FPGA and in a software-only environment.</p>
   </div>
 </div>
 

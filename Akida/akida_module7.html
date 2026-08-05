@@ -253,7 +253,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
   <div class="ib amber">
     <div class="ii">⚠</div>
-    <p><strong>Input must be uint8.</strong> The Akida hardware takes uint8 inputs (values 0–255). Ensure your preprocessing pipeline normalises to this range and explicitly casts: <code>img.astype(np.uint8)</code>. Float32 inputs will raise a TypeError at inference time.</p>
+    <p><strong>Input must be an integer type — uint8 or int8.</strong> The Akida hardware takes uint8 inputs (values 0–255) for dense data such as images, or int8 inputs for signed data such as spikes from a DVS camera. Ensure your preprocessing pipeline normalises to the appropriate range and explicitly casts, e.g. <code>img.astype(np.uint8)</code>. Float32 inputs will raise a TypeError at inference time.</p>
   </div>
 </div>
 
@@ -307,7 +307,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
   <div class="g2">
     <div class="card">
       <h3 style="margin-top:0;font-size:14px;color:#4ade80">FPS — frames per second</h3>
-      <p style="font-size:13.5px">Computed as <code>inference_frames / inference_time</code>. Only meaningful on real hardware where timing is accurate. On virtual devices, inference runs at host CPU speed — the FPS number reflects software simulation speed, not hardware speed.</p>
+      <p style="font-size:13.5px">Computed as <code>inference_frames / inference_time</code>. Only available on real hardware, where timing is accurate. Virtual devices (<code>SixNodesIPv2()</code> etc.) run on the host CPU and do not report an FPS figure — only <code>inference_clk</code> / <code>program_clk</code> cycle counts.</p>
     </div>
     <div class="card">
       <h3 style="margin-top:0;font-size:14px;color:#38bdf8">Power (mW) &amp; Energy (mJ)</h3>
@@ -464,7 +464,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
     <h3>Benchmark on live Akida IP — from your browser</h3>
     <p>The Akida FPGA Cloud provides a pre-configured Jupyter Labs environment where you can upload your model, run it on real remotely-hosted Akida hardware — the hardware BrainChip designed Akida for — and get accurate FPS and power figures, without owning a physical development board.</p>
     <div class="cloud-features">
-      <div class="cloud-feat">Upload models from TensorFlow/Keras or PyTorch via MetaTF</div>
+      <div class="cloud-feat">Upload models from TensorFlow/Keras via MetaTF or PyTorch via MetaONNX</div>
       <div class="cloud-feat">Run on live Akida 2.0 IP hosted on FPGA</div>
       <div class="cloud-feat">Get real latency and power measurements</div>
       <div class="cloud-feat">Switch between 1–6 neural node configurations</div>
@@ -624,7 +624,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 
         <!-- Row 5: Inference -->
         <rect x="172" y="377" width="242" height="40" rx="7" fill="#0f172a" stroke="#22c55e" stroke-width="1.5"/>
-        <text x="293" y="393" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#4ade80" text-anchor="middle">model.forward(uint8_input)</text>
+        <text x="293" y="393" font-family="DM Sans,sans-serif" font-size="11" font-weight="600" fill="#4ade80" text-anchor="middle">model.forward(input)</text>
         <text x="293" y="407" font-family="DM Mono,monospace" font-size="10" fill="#22c55e" text-anchor="middle">→ integer potentials / float probs</text>
 
         <!-- Statistics output (side) -->
@@ -653,7 +653,7 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
   <div class="chips">
     <span class="chip cb_">forward() → int32 potentials</span>
     <span class="chip cb_">predict() → float32 probs</span>
-    <span class="chip cb_">uint8 input required</span>
+    <span class="chip cb_">uint8 or int8 input</span>
     <span class="chip cb_">batch inference for throughput</span>
     <span class="chip cg_">model.statistics</span>
     <span class="chip cg_">FPS (real hardware only)</span>
