@@ -709,20 +709,22 @@ code {
       <span class="section-eyebrow">02 · The Core Insight</span>
       <h2>The wasteful assumption: process everything, always</h2>
 
-      <p>A conventional neural network accelerator treats every inference identically. Given an input — say, a video frame — it runs every single layer, multiplies every weight by every activation, and produces an output. Every clock cycle. Every frame. Regardless of whether anything meaningful changed in the scene.</p>
+      <p>A conventional neural network accelerator treats every inference identically: every layer runs, every weight multiplies every activation, every cycle — regardless of whether the computation matters.</p>
 
-      <p>Think about a security camera pointed at an empty corridor. <strong>99% of the time, nothing is happening.</strong> Yet a traditional accelerator burns the same power processing that empty frame as it would a frame with motion. All that computation is pure waste.</p>
+      <p>Akida's insight is different: not every value the network computes is worth propagating. As a network processes an input, most of the intermediate activations — the values inside the network, after each layer — turn out to be zero. This is true whether the input is a static corridor or a busy, ever-changing scene; it's a property of how well-trained sparse networks represent information, not a property of how "eventful" the raw input is. Akida is built to detect those zeros as they're produced and skip the computation they would have triggered. Nothing is skipped because the scene didn't change — computation is skipped because a value inside the network turned out to be zero.</p>
+
+      <p>This means Akida's efficiency gains aren't limited to "boring" inputs like idle security cameras. Any workload where the network naturally produces sparse activations — which, done right, is most of them — benefits.</p>
 
       <!-- Interactive toggle diagram -->
       <div class="diagram-wrap">
         <div class="diagram-header">
           <div class="dot"></div>
-          Traditional vs event-based processing — compute per frame over time
+          Dense vs event-driven compute — same reduction regardless of input content
         </div>
         <div class="diagram-body">
           <div class="toggle-group">
-            <button class="toggle-btn active" id="btn-trad" onclick="showMode('trad')">Traditional (always-on)</button>
-            <button class="toggle-btn" id="btn-event" onclick="showMode('event')">Akida (event-based)</button>
+            <button class="toggle-btn active" id="btn-trad" onclick="showMode('trad')">Dense (no sparsity exploited)</button>
+            <button class="toggle-btn" id="btn-event" onclick="showMode('event')">Akida (activation-sparse)</button>
           </div>
 
           <div id="view-trad">
@@ -733,9 +735,9 @@ code {
                 </marker>
               </defs>
               <!-- Y label -->
-              <text x="16" y="50" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">Compute</text>
-              <text x="16" y="65" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">per frame</text>
-              <!-- All frames same height (orange=wasted, blue=useful) -->
+              <text x="25" y="50" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">Compute</text>
+              <text x="25" y="65" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">per input</text>
+              <!-- Every input, same full height — content doesn't matter -->
               <rect x="64"  y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="102" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="140" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
@@ -744,11 +746,9 @@ code {
               <rect x="254" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="292" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="330" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
-              <!-- Event frames (blue) -->
-              <rect x="368" y="24" width="32" height="56" rx="3" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <rect x="406" y="24" width="32" height="56" rx="3" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <rect x="444" y="24" width="32" height="56" rx="3" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <!-- Back to wasted -->
+              <rect x="368" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
+              <rect x="406" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
+              <rect x="444" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="482" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="520" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <rect x="558" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
@@ -758,13 +758,11 @@ code {
               <rect x="710" y="24" width="32" height="56" rx="3" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <!-- Legend -->
               <rect x="64"  y="98" width="13" height="13" rx="2" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
-              <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Wasted compute (empty scene)</text>
-              <rect x="290" y="98" width="13" height="13" rx="2" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <text x="308" y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Useful compute (motion)</text>
-              <!-- Power line (flat) -->
+              <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Every value computed — whether it's zero or not</text>
+              <!-- Power line (flat, high) -->
               <text x="16" y="148" font-family="DM Sans,sans-serif" font-size="11" fill="#64748b">Power</text>
               <line x1="64" y1="150" x2="744" y2="150" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round"/>
-              <text x="64" y="170" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Constant power draw — same whether scene is empty or busy</text>
+              <text x="64" y="170" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Constant, high power draw — the same for every input, whatever it contains</text>
             </svg>
           </div>
 
@@ -772,69 +770,66 @@ code {
             <svg width="100%" viewBox="0 0 760 195" style="max-width:760px">
               <!-- Y label -->
               <text x="16" y="50" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">Compute</text>
-              <text x="16" y="65" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">per frame</text>
-              <!-- Quiet frames — nearly zero height -->
-              <rect x="64"  y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="102" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="140" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="178" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="216" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="254" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="292" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="330" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <!-- Event spikes -->
-              <rect x="368" y="24" width="32" height="56" rx="3" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <rect x="406" y="24" width="32" height="56" rx="3" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <rect x="444" y="24" width="32" height="56" rx="3" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <!-- Quiet again -->
-              <rect x="482" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="520" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="558" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="596" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="634" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="672" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <rect x="710" y="76" width="32" height="4" rx="1" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
+              <text x="16" y="65" font-family="DM Sans,sans-serif" font-size="11.5" fill="#64748b" text-anchor="middle">per input</text>
+              <!-- Every input, same short height — only the non-zero fraction is computed -->
+              <rect x="64"  y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="102" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="140" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="178" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="216" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="254" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="292" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="330" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="368" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="406" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="444" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="482" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="520" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="558" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="596" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="634" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="672" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <rect x="710" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
               <!-- Legend -->
-              <rect x="64"  y="98" width="13" height="13" rx="2" fill="#dcfce7" stroke="#22c55e" stroke-width="0.8"/>
-              <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Near-zero (no events, chip is idle)</text>
-              <rect x="290" y="98" width="13" height="13" rx="2" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <text x="308" y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Active burst (events detected)</text>
-              <!-- Variable power line -->
+              <rect x="64"  y="98" width="13" height="13" rx="2" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
+              <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Only non-zero activations computed — same fraction, every input</text>
+              <!-- Power line (flat, low) -->
               <text x="16" y="148" font-family="DM Sans,sans-serif" font-size="11" fill="#64748b">Power</text>
-              <polyline points="64,168 366,168 368,155 480,155 482,168 744,168"
-                stroke="#22c55e" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-              <text x="64" y="185" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Power drops to near-zero during quiet periods — rises only when events occur</text>
+              <line x1="64" y1="168" x2="744" y2="168" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
+              <text x="64" y="185" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Constant, low power draw — the saving comes from activation sparsity inside the network, not from how "eventful" the input is</text>
             </svg>
           </div>
         </div>
-        <div class="diagram-caption">Toggle between modes. The event-based approach processes the same useful information while consuming a tiny fraction of the energy during idle periods.</div>
+        <div class="diagram-caption">Toggle between modes. Unlike an event camera skipping quiet frames, this reduction doesn't depend on the input changing — it's the same whether the input is static or constantly changing, because it comes from zeros inside the network, not from motion in the raw signal.</div>
       </div>
 
-      <p>This is the neuromorphic insight: <span class="term">only process what changes</span>. Instead of running every layer every cycle, BrainChip Akida processes <strong>events</strong> — meaningful changes in the input signal. When nothing changes, nearly nothing executes, and power drops accordingly.</p>
+      <p>This is the neuromorphic insight: <span class="term">only propagate what's non-zero</span>. Instead of running every layer every cycle regardless of what it computes, BrainChip Akida detects the zeros a network produces internally and skips the computation they would have triggered — on every input, busy or idle alike.</p>
     </div>
 
     <!-- ── §3 Sparsity ── -->
     <div class="section">
       <span class="section-eyebrow">03 · Sparsity</span>
-      <h2>Sparsity — three places where zeros live</h2>
+      <h2>Sparsity — where the zeros come from, and which ones matter</h2>
 
-      <p>The word <span class="term">sparsity</span> appears constantly in BrainChip Akida documentation. It simply means that a large fraction of the data being processed is zero — and anything multiplied by zero is zero, so those operations can be skipped entirely. Akida exploits sparsity in three distinct layers of the processing pipeline:</p>
+      <p><span class="term">Sparsity</span> means a large fraction of the data being processed is zero, and anything multiplied by zero is zero — so that computation can be skipped. Akida is architected around exploiting this, primarily in one place: <strong>activation sparsity</strong>. After each layer, a sparsity-inducing activation (e.g. ReLU, or sparsity-regularized variants) sets many values to zero. Those zeros are exactly what Akida's event-driven compute fabric skips — this is the core mechanism, not a side effect.</p>
 
-      <div class="card-grid-3">
-        <div class="card card-accent-orange">
-          <h3 style="margin-top:0;color:#ea580c;font-size:15px">① Input sparsity</h3>
-          <p>Streaming sensor inputs are converted to events at the hardware level. Only pixels or readings that <em>changed significantly</em> generate an event. A static background produces zero events.</p>
-          <div style="margin-top:10px;font-size:12px;font-weight:600;color:#16a34a">↓ Concentrated at the first layer — sparsity in deeper layers instead comes from activation regularization during training</div>
-        </div>
+      <div class="card card-accent-purple" style="margin:20px 0">
+        <h3 style="margin-top:0;color:#7c3aed;font-size:15px">Activation sparsity — the core mechanism</h3>
+        <p>In a well-trained sparse network, 50–90% of activations are zero after each layer and need not propagate further. Akida's hardware fires only on the non-zero events, so the skipped computation translates directly into skipped power draw.</p>
+      </div>
+
+      <p>Two other forms of sparsity are worth knowing about, but they play a smaller or different role on this hardware:</p>
+
+      <div class="card-grid-2">
         <div class="card card-accent-blue">
-          <h3 style="margin-top:0;color:#0284c7;font-size:15px">② Weight sparsity</h3>
-          <p>Model weights can be pruned during training — small weights that contribute little to the output are zeroed out. On Akida hardware, however, this unstructured pruning has minimal impact on inference speed; the efficiency gains here come from input and activation sparsity, not from skipping individual zero weights.</p>
-          <div style="margin-top:10px;font-size:12px;font-weight:600;color:#b45309">△ Reduces model size, not inference latency, on this hardware</div>
+          <h3 style="margin-top:0;color:#0284c7;font-size:15px">Weight sparsity</h3>
+          <p>Comes in two flavors that matter very differently for Akida. <strong>Unstructured pruning</strong> (zeroing individual small weights scattered throughout a tensor) shrinks model size but doesn't speed up inference — the hardware isn't built to skip individual zeroed weights, so the dense compute still happens. <strong>Structured pruning</strong> (removing entire channels, filters, or neurons) is different: it actually shrinks the architecture — fewer channels to compute, period — so it produces a smaller, faster model on Akida the same way it would on any accelerator.</p>
+          <div style="margin-top:10px;font-size:12px;font-weight:600;color:#b45309">△ Structured pruning's speedup isn't from Akida's event-driven mechanism — it's the ordinary "smaller model → less compute" effect. Combine it with activation sparsity and the gains stack: one shrinks the model, the other skips computation inside the smaller model that remains.</div>
         </div>
-        <div class="card card-accent-purple">
-          <h3 style="margin-top:0;color:#7c3aed;font-size:15px">③ Activation sparsity</h3>
-          <p>After each layer, ReLU activation sets all negative values to zero. In a well-trained sparse network, 50–90% of activations are zero and need not propagate further.</p>
-          <div style="margin-top:10px;font-size:12px;font-weight:600;color:#16a34a">↓ Reduces downstream data movement, proportional to the zero-activation rate</div>
+        <div class="card card-accent-orange">
+          <h3 style="margin-top:0;color:#ea580c;font-size:15px">Input sparsity</h3>
+          <p>Matters a great deal if you're using an event-based sensor upstream of Akida — a static background produces zero events. But it isn't inherent to Akida itself: Akida works fine on conventional dense-frame input too, deriving its efficiency from what happens to that data once it enters the network.</p>
+          <div style="margin-top:10px;font-size:12px;font-weight:600;color:#16a34a">↓ Optional, sensor-dependent — not required for Akida's efficiency gains</div>
         </div>
       </div>
 
@@ -1064,7 +1059,7 @@ code {
     <!-- -- BrainChip signoff -- -->
     <div style="background:#0A1F3D;border-radius:16px;padding:44px 40px;margin:8px 0 0;text-align:center">
       <svg height="66" width="253" viewBox="0 0 8334 2178" role="img" aria-label="BrainChip logo" style="display:inline-block;margin-bottom:20px"><use href="#bc-logo-negative"></use></svg>
-      <p style="color:#c3d0e0;font-size:15px;line-height:1.7;max-width:640px;margin:0 auto">This module laid out why BrainChip built Akida the way it did: event-based sensing, three layers of sparsity, and at-memory compute that keep power in the milliwatts instead of the watts other accelerators need. That efficiency is the foundation of BrainChip's entire Akida product line, from the sub-milliwatt Akida Pico to the Akida 2.0 IP, and it's what makes always-on edge AI practical outside a lab. Module 2 goes inside the silicon itself to show how BrainChip Akida's nodes, NPEs, and on-chip memory actually deliver on that promise.</p>
+      <p style="color:#c3d0e0;font-size:15px;line-height:1.7;max-width:640px;margin:0 auto">This module laid out why BrainChip built Akida the way it did: an event-driven fabric that skips computation wherever activations turn out to be zero, together with at-memory compute — the combination that keeps power in the milliwatts instead of the watts other accelerators need. That efficiency is the foundation of BrainChip's entire Akida product line, from the sub-milliwatt Akida Pico to the Akida 2.0 IP, and it's what makes always-on edge AI practical outside a lab. Module 2 goes inside the silicon itself to show how BrainChip Akida's nodes, NPEs, and on-chip memory actually deliver on that promise.</p>
     </div>
 
   </div><!-- /content -->
