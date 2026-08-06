@@ -37,7 +37,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .sb-link.active .ml small,.sb-link.done .ml small{color:rgba(56,189,248,.65)}
 .sb-prog{margin-top:auto;padding:20px 22px;border-top:1px solid rgba(255,255,255,.06)}
 .pb{height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin:8px 0 6px}
-.pb-f{height:100%;width:43%;background:var(--ac);border-radius:2px}
+.pb-f{height:100%;width:37.5%;background:var(--ac);border-radius:2px}
 .main{margin-left:var(--sw);flex:1;min-height:100vh;position:relative;z-index:1}
 .topbar{background:var(--cb);border-bottom:1px solid var(--bd);padding:13px 52px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tm);position:sticky;top:0;z-index:50}
 .topbar .sep{color:#cbd5e1;margin:0 2px}
@@ -154,10 +154,11 @@ pre .p{color:#e2e8f0}
   <a href="akida_module5.html" class="sb-link"><span class="mn">5</span><span class="ml">MetaONNX Flow<small>ONNX → HybridModel</small></span></a>
   <a href="akida_module6.html" class="sb-link"><span class="mn">6</span><span class="ml">Devices &amp; Mapping<small>Virtual &amp; real hardware</small></span></a>
   <a href="akida_module7.html" class="sb-link"><span class="mn">7</span><span class="ml">Inference &amp; Performance<small>FPS, power, statistics</small></span></a>
+  <a href="akida_module8.html" class="sb-link"><span class="mn">8</span><span class="ml">Supported Layers &amp; Ops<small>What Akida can and can't run</small></span></a>
   <div class="sb-prog">
     <div style="font-size:11px;color:rgba(148,163,184,.45);text-transform:uppercase;letter-spacing:.1em">Progress</div>
     <div class="pb"><div class="pb-f"></div></div>
-    <div style="font-size:12px;color:#334155">3 of 7 modules</div>
+    <div style="font-size:12px;color:#334155">3 of 8 modules</div>
   </div>
 </nav>
 
@@ -171,7 +172,7 @@ pre .p{color:#e2e8f0}
 <div class="hero">
   <div class="hero-tag">
     <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="3.5" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="4.5" r="1.5" fill="currentColor"/></svg>
-    Module 3 of 7
+    Module 3 of 8
   </div>
   <h1>Quantization — converting float models for BrainChip Akida</h1>
   <p class="sub">Akida's hardware is integer-only. Every model must be quantized before it can run on the chip. This module covers what quantization is, how calibration works, when to use PTQ vs QAT, what the bitwidth choices mean in practice, and how QuantizeML and MetaONNX handle this step for you.</p>
@@ -623,7 +624,7 @@ pre .p{color:#e2e8f0}
 
 <div class="bot">
   <a href="akida_module2.html" class="btn btn-s">← Module 2: Hardware Architecture</a>
-  <div style="font-size:13px;color:var(--tm);text-align:center">Module 3 of 7 &nbsp;·&nbsp; Quantization</div>
+  <div style="font-size:13px;color:var(--tm);text-align:center">Module 3 of 8 &nbsp;·&nbsp; Quantization</div>
   <a href="akida_module4.html" class="btn btn-p">Module 4: MetaTF Flow →</a>
 </div>
 </main>

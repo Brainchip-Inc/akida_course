@@ -2,7 +2,8 @@
 
 Self-contained HTML training material covering BrainChip's Akida 2 neuromorphic
 IP — from core architecture through quantization, model conversion, device
-mapping, and on-hardware inference and performance measurement.
+mapping, on-hardware inference and performance measurement, and a reference
+on supported layers and operations.
 
 ## Viewing the course
 
@@ -22,6 +23,7 @@ navigate forward using the sidebar or the bottom-of-page controls.
 | [`akida_module5.html`](Akida/akida_module5.html) | 5 — MetaONNX Flow | ONNX → `onnx2akida.convert()` → HybridModel pipeline |
 | [`akida_module6.html`](Akida/akida_module6.html) | 6 — Devices & Mapping | Virtual/real devices, `create_device()`, MapMode, `model.summary()` |
 | [`akida_module7.html`](Akida/akida_module7.html) | 7 — Inference & Performance | `forward()`/`predict()`, FPS/power statistics, CLI, Akida Cloud, optimization |
+| [`akida_module8.html`](Akida/akida_module8.html) | 8 — Supported Layers & Operations | Layer/activation/bitwidth reference, structural constraints, HybridModel CPU fallback |
 
 Supplementary / not part of the main sequence:
 
@@ -39,6 +41,12 @@ pending rather than asserted as fact, and are called out inline with
 wasn't certain at review time — e.g. the precise CNP1 vs CNP2 selection
 criteria, and the exact effect of `onnx2akida.convert()`'s `enable_hwpr`
 argument. Search the modules for "HW/SW team" to find all such flags.
+
+Module 8 is a new consolidated reference built entirely from facts already
+stated in Modules 2–6 — it hasn't been through a separate SME pass and
+carries forward the same pending flags (e.g. the CNP1/CNP2 boundary) rather
+than resolving them. Treat it as reviewed to the same extent as the modules
+it draws from, not as independently re-verified.
 
 ## Contributing
 

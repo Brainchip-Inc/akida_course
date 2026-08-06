@@ -32,7 +32,7 @@ body{font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;backgroun
 .sl.active .ml small,.sl.done .ml small{color:rgba(56,189,248,.65)}
 .sp{margin-top:auto;padding:20px 22px;border-top:1px solid rgba(255,255,255,.06)}
 .pb{height:4px;background:rgba(255,255,255,.07);border-radius:2px;margin:8px 0 6px}
-.pb-f{height:100%;width:100%;background:var(--ac);border-radius:2px}
+.pb-f{height:100%;width:87.5%;background:var(--ac);border-radius:2px}
 .main{margin-left:var(--sw);flex:1;min-height:100vh;position:relative;z-index:1}
 .topbar{background:var(--cb);border-bottom:1px solid var(--bd);padding:13px 52px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tm);position:sticky;top:0;z-index:50}
 .topbar .sep{color:#cbd5e1;margin:0 2px}.topbar .cur{color:var(--tp);font-weight:500}
@@ -170,10 +170,11 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
   <a href="akida_module5.html" class="sl done"><span class="mn">✓</span><span class="ml">MetaONNX Flow<small>ONNX → HybridModel</small></span></a>
   <a href="akida_module6.html" class="sl done"><span class="mn">✓</span><span class="ml">Devices &amp; Mapping<small>Virtual &amp; real hardware</small></span></a>
   <a href="#" class="sl active"><span class="mn">7</span><span class="ml">Inference &amp; Performance<small>FPS, power, statistics</small></span></a>
+  <a href="akida_module8.html" class="sl"><span class="mn">8</span><span class="ml">Supported Layers &amp; Ops<small>What Akida can and can't run</small></span></a>
   <div class="sp">
     <div style="font-size:11px;color:rgba(148,163,184,.45);text-transform:uppercase;letter-spacing:.1em">Progress</div>
     <div class="pb"><div class="pb-f"></div></div>
-    <div style="font-size:12px;color:#334155">7 of 7 — complete!</div>
+    <div style="font-size:12px;color:#334155">7 of 8 modules</div>
   </div>
 </nav>
 
@@ -187,14 +188,14 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
 <div class="hero">
   <div class="hero-tag">
     <svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="3.5" stroke="currentColor" stroke-width="1.4"/><circle cx="4.5" cy="4.5" r="1.5" fill="currentColor"/></svg>
-    Module 7 of 7 — Final module
+    Module 7 of 8
   </div>
   <h1>Running inference and measuring performance</h1>
   <p class="sub">How to run inference efficiently, what every field in model.statistics means, how to measure real power on hardware, the PowerMeter API, the akida run CLI, Akida Cloud for hardware-free benchmarking, and a set of practical optimisation tips to get the most from your deployment.</p>
   <div class="hero-meta">
     <span class="mi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>~30 min read</span>
     <span class="mi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Code-heavy + interactive stats</span>
-    <span class="mi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Course capstone included</span>
+    <span class="mi"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>Deployment capstone included</span>
   </div>
 </div>
 
@@ -672,22 +673,22 @@ pre .c{color:#4a5568}pre .k{color:#38bdf8}pre .s{color:#4ade80}pre .n{color:#fbb
   </div>
 
   <div class="complete-banner">
-    <div class="complete-icon">🎉</div>
-    <div class="complete-title">Course complete — you now know BrainChip's Akida 2 platform</div>
-    <p class="complete-sub" style="margin-top:10px">You've covered the full stack: neuromorphic principles, hardware architecture, quantization, the MetaTF and MetaONNX pipelines, device selection and mapping, and performance measurement. You are ready to deploy on Akida 2.</p>
+    <div class="complete-icon">🚀</div>
+    <div class="complete-title">Core pipeline complete — you're ready to deploy on Akida 2</div>
+    <p class="complete-sub" style="margin-top:10px">You've covered the full stack: neuromorphic principles, hardware architecture, quantization, the MetaTF and MetaONNX pipelines, device selection and mapping, and performance measurement. One module remains: a consolidated reference on exactly which layers, activations, and operations Akida supports — and which fall back to CPU.</p>
   </div>
 </div>
 
   <div style="background:#0A1F3D;border-radius:16px;padding:40px 44px;margin:36px 0 8px;text-align:center">
     <svg width="253" height="66" viewBox="0 0 8334 2178" style="display:block;margin:0 auto 20px" aria-label="BrainChip logo"><use href="#bc-logo-negative"></use></svg>
-    <p style="color:#c3d0e0;font-size:14.5px;line-height:1.75;max-width:640px;margin:0 auto">Module 7 closes the loop on everything BrainChip Akida is built for: running inference through forward() and predict(), reading real FPS, power, and energy back out of model.statistics, and profiling continuous power draw with the PowerMeter API. Whether you benchmark on a physical board, Akida Cloud, or the akida run CLI, the numbers you measure here are the evidence behind BrainChip's core claim &mdash; that event-driven, sparsity-aware neural processing delivers real accuracy at a fraction of the power a conventional accelerator would need. With this module complete, you have taken BrainChip Akida from concept to a fully quantized, mapped, and measured deployment.</p>
+    <p style="color:#c3d0e0;font-size:14.5px;line-height:1.75;max-width:640px;margin:0 auto">Module 7 closes the loop on everything BrainChip Akida is built for: running inference through forward() and predict(), reading real FPS, power, and energy back out of model.statistics, and profiling continuous power draw with the PowerMeter API. Whether you benchmark on a physical board, Akida Cloud, or the akida run CLI, the numbers you measure here are the evidence behind BrainChip's core claim &mdash; that event-driven, sparsity-aware neural processing delivers real accuracy at a fraction of the power a conventional accelerator would need. With this module complete, you have taken BrainChip Akida from concept to a fully quantized, mapped, and measured deployment. Module 8 closes out the course with a consolidated reference on exactly which layers, activations, and operations run on Akida hardware.</p>
   </div>
 </div><!-- /content -->
 
 <div class="bot">
   <a href="akida_module6.html" class="btn btn-s">← Module 6: Devices &amp; Mapping</a>
-  <div style="font-size:13px;color:var(--tm);text-align:center">Module 7 of 7 &nbsp;·&nbsp; Course Complete</div>
-  <a href="akida_module1.html" class="btn btn-p">↺ Start from Module 1</a>
+  <div style="font-size:13px;color:var(--tm);text-align:center">Module 7 of 8</div>
+  <a href="akida_module8.html" class="btn btn-p">Module 8: Supported Layers &amp; Ops →</a>
 </div>
 </main>
 
