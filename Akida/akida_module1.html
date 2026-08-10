@@ -763,10 +763,10 @@ code {
               <!-- Legend -->
               <rect x="64"  y="98" width="13" height="13" rx="2" fill="#fed7aa" stroke="#fb923c" stroke-width="0.8"/>
               <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Every value computed — whether it's zero or not</text>
-              <!-- Power line (flat, high) -->
-              <text x="16" y="148" font-family="DM Sans,sans-serif" font-size="11" fill="#64748b">Power</text>
+              <!-- Latency line (flat, high) -->
+              <text x="16" y="148" font-family="DM Sans,sans-serif" font-size="11" fill="#64748b">Latency</text>
               <line x1="64" y1="150" x2="744" y2="150" stroke="#fb923c" stroke-width="2.5" stroke-linecap="round"/>
-              <text x="64" y="170" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Constant, high power draw — the same for every input, whatever it contains</text>
+              <text x="64" y="170" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Constant, high latency — the same for every input, whatever it contains</text>
             </svg>
           </div>
 
@@ -796,11 +796,11 @@ code {
               <rect x="710" y="66" width="32" height="14" rx="1" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
               <!-- Legend -->
               <rect x="64"  y="98" width="13" height="13" rx="2" fill="#93c5fd" stroke="#3b82f6" stroke-width="0.8"/>
-              <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Only non-zero activations computed — same fraction, every input</text>
-              <!-- Power line (flat, low) -->
-              <text x="16" y="148" font-family="DM Sans,sans-serif" font-size="11" fill="#64748b">Power</text>
+              <text x="82"  y="109" font-family="DM Sans,sans-serif" font-size="12" fill="#64748b">Only non-zero activations computed</text>
+              <!-- Latency line (flat, low) -->
+              <text x="16" y="148" font-family="DM Sans,sans-serif" font-size="11" fill="#64748b">Latency</text>
               <line x1="64" y1="168" x2="744" y2="168" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round"/>
-              <text x="64" y="185" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Constant, low power draw — the saving comes from activation sparsity inside the network, not from how "eventful" the input is</text>
+              <text x="64" y="185" font-family="DM Sans,sans-serif" font-size="11" fill="#94a3b8">Lower latency — the saving comes from activation sparsity inside the network, not from how "eventful" the input is</text>
             </svg>
           </div>
         </div>
@@ -819,7 +819,7 @@ code {
 
       <div class="card card-accent-purple" style="margin:20px 0">
         <h3 style="margin-top:0;color:#7c3aed;font-size:15px">Activation sparsity — the core mechanism</h3>
-        <p>In a well-trained sparse network, 50–90% of activations are zero after each layer and need not propagate further. Akida's hardware fires only on the non-zero events, so the skipped computation translates directly into skipped power draw.</p>
+        <p>In a well-trained sparse network, 50–90% of activations are zero after each layer and need not propagate further. Akida's hardware fires only on the non-zero events, so the skipped computation translates directly into reduced latency, and thus reduced energy per inference — power draw itself is unaffected.</p>
       </div>
 
       <p>Two other forms of sparsity are worth knowing about, but they play a smaller or different role on this hardware:</p>
@@ -827,7 +827,7 @@ code {
       <div class="card-grid-2">
         <div class="card card-accent-blue">
           <h3 style="margin-top:0;color:#0284c7;font-size:15px">Weight sparsity</h3>
-          <p>Comes in two flavors that matter very differently for Akida. <strong>Unstructured pruning</strong> (zeroing individual small weights scattered throughout a tensor) shrinks model size but doesn't speed up inference — the hardware isn't built to skip individual zeroed weights, so the dense compute still happens. <strong>Structured pruning</strong> (removing entire channels, filters, or neurons) is different: it actually shrinks the architecture — fewer channels to compute, period — so it produces a smaller, faster model on Akida the same way it would on any accelerator.</p>
+          <p>Comes in two flavors that matter very differently for Akida. <strong>Unstructured pruning</strong> (zeroing individual small weights scattered throughout a tensor) is not exploited on Akida — the hardware isn't built to skip individual zeroed weights, so the dense compute still happens. <strong>Structured pruning</strong> (removing entire channels, filters, or neurons) is different: it actually shrinks the architecture — fewer channels to compute, period — so it produces a smaller, faster model on Akida the same way it would on any accelerator.</p>
           <div style="margin-top:10px;font-size:12px;font-weight:600;color:#b45309">△ Structured pruning's speedup isn't from Akida's event-driven mechanism — it's the ordinary "smaller model → less compute" effect. Combine it with activation sparsity and the gains stack: one shrinks the model, the other skips computation inside the smaller model that remains.</div>
         </div>
         <div class="card card-accent-orange">
@@ -1023,7 +1023,7 @@ code {
 
       <p>★ This course targets the Akida 2.0 IP — specifically the 6-node configuration represented by the <code>SixNodesIPv2</code> virtual device in the SDK, and the FPGA evaluation board when available.</p>
 
-      <p><strong>A note on TENNs support:</strong> "TENNs" isn't a single, uniform capability across the product line. The Akida 2.0 IP covered in this course supports the <em>buffered</em> variant (TNP_B — think of it as a temporal convolution that can be made recurrent). The state-space-style recurrent variant (TNP_R) is available on Akida Pico only. Keep these two apart when discussing TENNs support.</p>
+      <p><strong>A note on TENNs support:</strong> "TENNs" isn't a single, uniform capability across the product line. The Akida 2.0 IP covered in this course supports the <em>buffered</em> variant (TNP_B — think of it as a temporal convolution implemented in "streaming" mode so as to update outputs frame by frame). The state-space-style recurrent variant (TNP_R) is available on Akida Pico only. Keep these two apart when discussing TENNs support.</p>
     </div>
 
     <!-- ── §7 Recap ── -->
